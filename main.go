@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -182,8 +183,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					return m, nil
 				}
-				// If process or complete, prompt for ID
-				// if m.selectedAction == string(ActionProcess) || m.selectedAction == string(ActionComplete) {
 				m.currentScreen = PromptScreen
 				m.promptMessage = ""
 				if m.selectedAction == string(ActionProcess) || m.selectedAction == string(ActionComplete) {
@@ -193,18 +192,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.promptInput.SetValue("")
 				return m, textinput.Blink
-				// } else {
-				// 	// For start action, go directly to loading
-				// 	m.currentScreen = LoadingScreen
-				// 	payload := EventPayload{
-				// 		Action:            Action(m.selectedAction),
-				// 		SweepstakeQuestID: 0,
-				// 	}
-				// 	return m, tea.Batch(
-				// 		m.spinner.Tick,
-				// 		invokeLambdaCmd(m.selectedEnv, payload),
-				// 	)
-				// }
 
 			case PromptScreen:
 				// Validate input is a number
@@ -310,11 +297,14 @@ func (m model) View() string {
 		}
 
 		for _, line := range m.lambdaOutput {
-			output += line + "\n"
+			// Wrap long output lines
+			output += lipgloss.NewStyle().Width(m.width-4).Render(line) + "\n"
 		}
 
 		if m.lambdaLogs != "" {
-			output += "\n--- Lambda Logs ---\n\n" + m.lambdaLogs
+			output += "\n--- Lambda Logs ---\n\n"
+			// Wrap the logs with appropriate width
+			output += lipgloss.NewStyle().Width(m.width - 4).Render(m.lambdaLogs)
 		}
 
 		return docStyle.Render(fmt.Sprintf("%s\n\nPress 'b' to go back or 'q' to quit", output))
@@ -403,7 +393,11 @@ func invokeLambda(env string, payload EventPayload, output *[]string, logs *stri
 
 func decodeBase64(encoded string) (string, error) {
 	// AWS Go SDK already decodes the base64 for us in LogResult
-	return encoded, nil
+	decoded, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode base64: %v", err)
+	}
+	return string(decoded), nil
 }
 
 func checkSSOSession(profile string, output *[]string) error {
