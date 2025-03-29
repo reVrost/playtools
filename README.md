@@ -20,7 +20,7 @@
 ### Using Go
 
 ```bash
-go install github.com/revrost/playtools@latest
+go install github.com/revrost/playtools
 ```
 
 ## Configuration
