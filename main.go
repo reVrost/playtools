@@ -207,7 +207,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 					payload = EventPayload{
 						Action:            Action(m.selectedAction),
-						SweepstakeQuestID: id,
+						SweepstakeQuestID: &id,
 					}
 				} else {
 					// Start sweepstake action, with duration minutes
