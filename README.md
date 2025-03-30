@@ -3,9 +3,9 @@
 ## Features
 
 - Three primary actions:
-  - Start a new sweepstake quest
-  - Process sweepstake calculations (without distributing rewards)
-  - Complete sweepstake quests (with reward distribution)
+  - Start a new ss quest
+  - Process ss calculations 
+  - Complete ss quests 
 - AWS SSO authentication handling
 - Lambda function invocation with detailed response and logs display
 
@@ -58,34 +58,8 @@ playtools
 - Press 'b' to go back to the previous screen
 - Press 'q' or Ctrl+C to quit the application
 
-### Workflow
-
-1. Select your environment (Development or Production)
-2. Choose an action:
-   - Start Sweepstake: Create a new sweepstake quest
-   - Process Sweepstake: Calculate winners without distributing rewards
-   - Complete Sweepstake: Calculate winners and distribute rewards
-3. Provide required information:
-   - For Start: Enter duration in minutes
-   - For Process/Complete: Enter the sweepstake quest ID
-4. View detailed Lambda execution results and logs
-
-## Troubleshooting
-
 ### AWS SSO Session Issues
 
 If your SSO session has expired, the tool will automatically attempt to reauthenticate. Follow the browser prompts to complete the login process.
 
-### Lambda Invocation Failures
 
-Check the detailed error messages and logs displayed in the output screen. Common issues include:
-
-- Invalid sweepstake quest ID
-- Insufficient permissions
-- Network connectivity problems
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
