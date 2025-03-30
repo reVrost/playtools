@@ -52,7 +52,7 @@ type EventPayload struct {
 
 	// DryRun is only applicable for process action
 	DryRun            bool `json:"dry_run"`
-	SweepstakeQuestID int  `json:"sweepstake_quest_id"`
+	SweepstakeQuestID *int `json:"sweepstake_quest_id"`
 	BatchSize         *int `json:"batch_size,omitempty"`
 
 	// DurationMinutes Optional fields for action = start
