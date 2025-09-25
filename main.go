@@ -23,14 +23,22 @@ import (
 
 // Constants
 const (
-	devEnv  = "dev"
-	prodEnv = "prod"
+	devEnv     = "dev"
+	nonProdEnv = "nonprod"
+	prodEnv    = "prod"
 )
 
 // Profile mapping
 var profileMap = map[string]string{
-	devEnv:  "platform-nonprod-engineer",
-	prodEnv: "platform-prod-engineer", // Adjust this if your prod profile is different
+	devEnv:     "platform-dev-engineer",
+	nonProdEnv: "platform-nonprod-engineer",
+	prodEnv:    "platform-prod-engineer", // Adjust this if your prod profile is different
+}
+
+var apiHostmap = map[string]string{
+	devEnv:     "https://api.dev.immutable.com/",
+	nonProdEnv: "https://api.sandbox.immutable.com",
+	prodEnv:    "https://api.prod.immutable.com",
 }
 
 const sweepstakeFunctionName = "imx-rewards-%s-sweepstake-rewards-calculator"
@@ -51,13 +59,13 @@ type EventPayload struct {
 	Action Action `json:"action"`
 
 	// DryRun is only applicable for process action
-	DryRun            bool `json:"dry_run"`
+	// DryRun            bool `json:"dry_run"`
 	SweepstakeQuestID *int `json:"sweepstake_quest_id"`
-	BatchSize         *int `json:"batch_size,omitempty"`
+	// BatchSize         *int `json:"batch_size,omitempty"`
 
 	// DurationMinutes Optional fields for action = start
-	DurationMinutes     *int             `json:"duration_minutes,omitempty"`
-	SweepstakeOverrides *json.RawMessage `json:"sweepstake_overrides,omitempty"`
+	// DurationMinutes     *int             `json:"duration_minutes,omitempty"`
+	// SweepstakeOverrides *json.RawMessage `json:"sweepstake_overrides,omitempty"`
 }
 
 // Screen types to track the current state
@@ -109,12 +117,13 @@ func initialModel() model {
 	// Environment selection items
 	envItems := []list.Item{
 		item{title: "Development", desc: "Use development environment", action: devEnv},
+		item{title: "Non-Production", desc: "Use non-production environment", action: nonProdEnv},
 		item{title: "Production", desc: "Use production environment", action: prodEnv},
 	}
 
-	// Action selection items
+	// Action selection itemsc
 	actionItems := []list.Item{
-		item{title: "Start Sweepstake", desc: "Play new sweepstake, overriding existing ones", action: string(ActionStart)},
+		item{title: "Create Sweepstake", desc: "Create new sweepstake, overriding existing ones", action: string(ActionStart)},
 		item{title: "Process Sweepstake", desc: "Process sweepstake calculation without distributing rewards", action: string(ActionProcess)},
 		item{title: "Complete Sweepstake", desc: "Complete sweepstake calculation and distribute rewards", action: string(ActionComplete)},
 	}
@@ -185,12 +194,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				m.currentScreen = PromptScreen
 				m.promptMessage = ""
+				// TODO Default to current sweepstake quest ID
+				// hit sweepstake api
+				m.promptInput.SetValue("3907")
 				if m.selectedAction == string(ActionProcess) || m.selectedAction == string(ActionComplete) {
 					m.promptQuestion = "Please enter sweepstake quest ID"
 				} else {
 					m.promptQuestion = "Please enter sweepstake duration in minutes"
 				}
-				m.promptInput.SetValue("")
+				// m.promptInput.SetValue("")
 				return m, textinput.Blink
 
 			case PromptScreen:
@@ -212,8 +224,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				} else {
 					// Start sweepstake action, with duration minutes
 					payload = EventPayload{
-						Action:          Action(m.selectedAction),
-						DurationMinutes: &id,
+						Action: Action(m.selectedAction),
+						// DurationMinutes: &id,
 					}
 				}
 
